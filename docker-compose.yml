@@ -1,0 +1,131 @@
+version: "3.7"
+
+x-common-variables: &common-variables
+  # these variables need to be defined in an .env file
+  RABBITMQ_DEFAULT_USER: $RABBITMQ_USERNAME
+  RABBITMQ_DEFAULT_PASS: $RABBITMQ_PASSWORD
+  TIX_API_HOST: $TIX_API_HOST
+  TIX_API_PORT: $TIX_API_PORT
+  TIX_API_USER: $TIX_API_ADMIN_USERNAME
+  TIX_API_PASSWORD: $TIX_API_ADMIN_PASSWORD
+
+volumes:
+  ReportsVolume:
+  SchedulerVolume:
+  iptoas-datadir:
+  mysql-datadir:
+  sql-dump:
+
+services:
+  tix-time-server:
+    image: tixmeasurements/tix-time-server:latest
+    # build:
+    #   context: tix-time-server
+    environment:
+      <<: *common-variables
+      TIX__QUEUE__HOST: rabbitmq
+      TIX__LOG_LEVEL: ALL
+      TIX__LOG-LEVEL: ALL
+    ports:
+      - "4500:4500/udp"
+      - "8080:8080/tcp"
+    depends_on:
+      - rabbitmq
+
+  tix-client-trigger:
+    image: tixmeasurements/client-trigger:latest
+    # build:
+    #   context: tix-client-trigger
+    environment:
+      PORT: 7561
+    ports:
+      - "7561:7561/udp"
+
+  tix-time-condenser:
+    image: tixmeasurements/tix-time-condenser:latest
+    # build:
+    #   context: tix-time-condenser
+    volumes:
+      - ReportsVolume:/tmp/reports
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: $RABBITMQ_USERNAME 
+      SPRING_RABBITMQ_PASSWORD: $RABBITMQ_PASSWORD
+      TIX_CONDENSER_TIX_API_HTTPS: $TIX_API_HTTPS
+      TIX_CONDENSER_TIX_API_HOST: $TIX_API_HOST
+      TIX_CONDENSER_TIX_API_PORT: $TIX_API_PORT
+      TIX_CONDENSER_TIX_API_USER: $TIX_API_ADMIN_USERNAME
+      TIX_CONDENSER_TIX_API_PASSWORD: $TIX_API_ADMIN_PASSWORD
+
+  tix-time-processor-beat:
+    image: "tixmeasurements/tix-time-processor:latest"
+    environment:
+      <<: *common-variables
+      PROCESSOR_TYPE: BEAT
+      TIX_REPORTS_BASE_PATH: /reports
+      TIX_RABBITMQ_USER: $RABBITMQ_USERNAME
+      TIX_RABBITMQ_PASS: $RABBITMQ_PASSWORD
+      TIX_RABBITMQ_HOST: rabbitmq
+    volumes:
+      - SchedulerVolume:/tmp/celerybeat-schedule.d
+    depends_on:
+      - rabbitmq
+
+  tix-time-processor-worker:
+    image: "tixmeasurements/tix-time-processor:latest"
+    environment:
+      <<: *common-variables
+      PROCESSOR_TYPE: WORKER
+      TIX_REPORTS_BASE_PATH: /reports
+      TIX_RABBITMQ_USER: $RABBITMQ_USERNAME
+      TIX_RABBITMQ_PASS: $RABBITMQ_PASSWORD
+      TIX_RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ReportsVolume:/reports
+      - SchedulerVolume:/tmp/celerybeat-schedule.d
+    depends_on:
+      - rabbitmq
+
+  tix-api:
+    image: tixmeasurements/tix-api:latest
+    command: sh -c "./wait-for-it.sh --host=mysql --port=3306 --timeout=30 -- npm start"
+    build:
+      context: tix-api
+    ports:
+      - "3001:3001/tcp"
+    depends_on:
+      - mysql
+    environment:
+      <<: *common-variables
+
+  tix-iptoas:
+    image: tixmeasurements/iptoas:latest
+    depends_on:
+      - mysql
+    volumes:
+      - iptoas-datadir:/root/iptoas
+
+  tix-web:
+    image: tixmeasurements/tix-time-condenser:latest
+    # build:
+    #   context: tix-web
+    ports:
+      - "3000:$WEB_PORT"
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      <<: *common-variables
+    ports:
+      - "15672:15672"
+
+  mysql:
+    image: mysql:5.7.28
+    environment:
+      MYSQL_ROOT_PASSWORD: tix
+      MYSQL_DATABASE: tix
+      MYSQL_USER: tix
+      MYSQL_PASSWORD: tix
+    # volumes:
+    #   - mysql-datadir:/var/lib/mysql
+    #   - sql-dump:/docker-entrypoint-initdb.d
