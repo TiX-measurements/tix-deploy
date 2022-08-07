@@ -7,6 +7,7 @@ x-common-variables: &common-variables
   TIX_API_HOST: $TIX_API_HOST
   TIX_API_PORT: $TIX_API_PORT
   TIX_API_USER: $TIX_API_ADMIN_USERNAME
+  # TIX_API_SSL: True # uncomment to enable SSL
   TIX_API_PASSWORD: $TIX_API_ADMIN_PASSWORD
 
 volumes:
@@ -20,10 +21,12 @@ services:
   tix-time-server:
     image: tixmeasurements/tix-time-server:latest
     # build:
-    #   context: tix-time-server
+    #   context: ../tix-time-server
     environment:
       <<: *common-variables
       TIX__QUEUE__HOST: rabbitmq
+      TIX__QUEUE__USER: $RABBITMQ_USERNAME
+      TIX__QUEUE__PASSWORD: $RABBITMQ_PASSWORD
       TIX__LOG_LEVEL: ALL
       TIX__LOG-LEVEL: ALL
     ports:
@@ -44,7 +47,7 @@ services:
   tix-time-condenser:
     image: tixmeasurements/tix-time-condenser:latest
     # build:
-    #   context: tix-time-condenser
+    #   context: ../tix-time-condenser
     volumes:
       - ReportsVolume:/tmp/reports
     environment:
@@ -59,6 +62,8 @@ services:
 
   tix-time-processor-beat:
     image: "tixmeasurements/tix-time-processor:latest"
+    # build:
+    #   context: ../tix-time-processor
     environment:
       <<: *common-variables
       PROCESSOR_TYPE: BEAT
@@ -73,6 +78,8 @@ services:
 
   tix-time-processor-worker:
     image: "tixmeasurements/tix-time-processor:latest"
+    # build:
+    #   context: ../tix-time-processor
     environment:
       <<: *common-variables
       PROCESSOR_TYPE: WORKER
@@ -88,9 +95,9 @@ services:
 
   tix-api:
     image: tixmeasurements/tix-api:latest
-    command: sh -c "./wait-for-it.sh --host=mysql --port=3306 --timeout=30 -- npm start"
-    build:
-      context: tix-api
+    # build:
+    #   context: ../tix-api
+    command: "./wait-for-it.sh --host=mysql --port=3306 --timeout=30 -- npm start"
     ports:
       - "3001:3001/tcp"
     depends_on:
@@ -98,19 +105,19 @@ services:
     environment:
       <<: *common-variables
 
-  tix-iptoas:
-    image: tixmeasurements/iptoas:latest
-    depends_on:
-      - mysql
-    volumes:
-      - iptoas-datadir:/root/iptoas
+  # tix-iptoas:
+  #   image: tixmeasurements/iptoas:latest
+  #   depends_on:
+  #     - mysql
+  #   volumes:
+  #     - iptoas-datadir:/root/iptoas
 
   tix-web:
-    image: tixmeasurements/tix-time-condenser:latest
+    image: tixmeasurements/tix-web:latest
     # build:
-    #   context: tix-web
+    #   context: ../tix-web
     ports:
-      - "3000:$WEB_PORT"
+      - "$WEB_PORT:80"
   
   rabbitmq:
     image: rabbitmq:3-management
@@ -120,7 +127,7 @@ services:
       - "15672:15672"
 
   mysql:
-    image: mysql:5.7.28
+    image: mysql/mysql-server:5.7.28
     environment:
       MYSQL_ROOT_PASSWORD: tix
       MYSQL_DATABASE: tix
