@@ -14,6 +14,7 @@ RABBITMQ_PASSWORD=<pass>
 # API admin user credentials
 TIX_API_ADMIN_USERNAME=<user>
 TIX_API_ADMIN_PASSWORD=<pass>
+RECAPTCHA_SECRET_KEY=<secret-key>
 
 # port in the host where the frontend is served. For local deployments
 # you can use another port (like 3000)

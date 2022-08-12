@@ -110,6 +110,7 @@ services:
       - mysql
     environment:
       <<: *common-variables
+      RECAPTCHA_SECRET_KEY: $RECAPTCHA_SECRET_KEY
 
   # tix-iptoas:
   #   image: tixmeasurements/iptoas:latest
