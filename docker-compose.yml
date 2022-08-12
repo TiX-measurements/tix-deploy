@@ -19,6 +19,7 @@ volumes:
 
 services:
   tix-time-server:
+    restart: always
     image: tixmeasurements/tix-time-server:latest
     # build:
     #   context: ../tix-time-server
@@ -36,6 +37,7 @@ services:
       - rabbitmq
 
   tix-client-trigger:
+    restart: always
     image: tixmeasurements/client-trigger:latest
     # build:
     #   context: tix-client-trigger
@@ -45,6 +47,7 @@ services:
       - "7561:7561/udp"
 
   tix-time-condenser:
+    restart: always
     image: tixmeasurements/tix-time-condenser:latest
     # build:
     #   context: ../tix-time-condenser
@@ -61,6 +64,7 @@ services:
       TIX_CONDENSER_TIX_API_PASSWORD: $TIX_API_ADMIN_PASSWORD
 
   tix-time-processor-beat:
+    restart: always
     image: "tixmeasurements/tix-time-processor:latest"
     # build:
     #   context: ../tix-time-processor
@@ -77,6 +81,7 @@ services:
       - rabbitmq
 
   tix-time-processor-worker:
+    restart: always
     image: "tixmeasurements/tix-time-processor:latest"
     # build:
     #   context: ../tix-time-processor
@@ -94,6 +99,7 @@ services:
       - rabbitmq
 
   tix-api:
+    restart: always
     image: tixmeasurements/tix-api:latest
     # build:
     #   context: ../tix-api
@@ -113,6 +119,7 @@ services:
   #     - iptoas-datadir:/root/iptoas
 
   tix-web:
+    restart: always
     image: tixmeasurements/tix-web:latest
     # build:
     #   context: ../tix-web
@@ -120,6 +127,7 @@ services:
       - "$WEB_PORT:80"
   
   rabbitmq:
+    restart: always
     image: rabbitmq:3-management
     environment:
       <<: *common-variables
@@ -127,6 +135,7 @@ services:
       - "15672:15672"
 
   mysql:
+    restart: always
     image: mysql/mysql-server:5.7.28
     environment:
       MYSQL_ROOT_PASSWORD: tix
