@@ -35,6 +35,16 @@ Once the `.env` file is properly set up, just run:
 docker-compose up
 ```
 
+### TP to AS
+
+The [service `tix-iptoas`](https://github.com/TiX-measurements/ip_to_as) will initialize the MySQL database with the mappings from the IP prefixes to autonomous system organization names (used for when the application creates reports). This service is manually executed because it takes a while to run. To run it just execute:
+
+```shell
+# override the default "dummy" command used in the compose file by setting the entrypoint
+# explicitly
+docker compose run --entrypoint 'sh /app/exe.sh' tix-iptoas
+```
+
 ### Restart deploy
 
 The compose will create some persistent volumes. These volumes are persisted even if you destroy the containers by executing `docker-compose down`. If you want to run the deployment from scratch, you'll have to delete them. You can list the existing volumes by using the `docker volume ls` command and then delete by using `docker volume rm <volume name>`.

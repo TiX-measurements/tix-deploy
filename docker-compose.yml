@@ -112,12 +112,17 @@ services:
       <<: *common-variables
       RECAPTCHA_SECRET_KEY: $RECAPTCHA_SECRET_KEY
 
-  # tix-iptoas:
-  #   image: tixmeasurements/iptoas:latest
-  #   depends_on:
-  #     - mysql
-  #   volumes:
-  #     - iptoas-datadir:/root/iptoas
+  tix-iptoas:
+    image: tixmeasurements/iptoas:latest
+    # build:
+    #   context: ../ip_to_as
+    command: "echo 'this service is manually executed'"
+    depends_on:
+      - mysql
+    volumes:
+      # store downloaded files in the host machine so they can be manually
+      # deleted if desired
+      - ./iptoas_downloads:/app/downloads
 
   tix-web:
     restart: always
@@ -139,6 +144,7 @@ services:
     restart: always
     image: mysql/mysql-server:5.7.28
     environment:
+      MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: tix
       MYSQL_DATABASE: tix
       MYSQL_USER: tix
