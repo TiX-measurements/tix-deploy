@@ -17,6 +17,10 @@ volumes:
   mysql-datadir:
   sql-dump:
 
+x-common-logging: &common-logging
+  options:
+    max-size: 200m
+
 services:
   tix-time-server:
     restart: always
@@ -35,6 +39,8 @@ services:
       - "8080:8080/tcp"
     depends_on:
       - rabbitmq
+    logging:
+      <<: *common-logging
 
   tix-client-trigger:
     restart: always
@@ -45,6 +51,8 @@ services:
       PORT: 7561
     ports:
       - "7561:7561/udp"
+    logging:
+      <<: *common-logging
 
   tix-time-condenser:
     restart: always
@@ -62,6 +70,8 @@ services:
       TIX_CONDENSER_TIX_API_PORT: $TIX_API_PORT
       TIX_CONDENSER_TIX_API_USER: $TIX_API_ADMIN_USERNAME
       TIX_CONDENSER_TIX_API_PASSWORD: $TIX_API_ADMIN_PASSWORD
+    logging:
+      <<: *common-logging
 
   tix-time-processor-beat:
     restart: always
@@ -79,6 +89,8 @@ services:
       - SchedulerVolume:/tmp/celerybeat-schedule.d
     depends_on:
       - rabbitmq
+    logging:
+      <<: *common-logging
 
   tix-time-processor-worker:
     restart: always
@@ -97,6 +109,8 @@ services:
       - SchedulerVolume:/tmp/celerybeat-schedule.d
     depends_on:
       - rabbitmq
+    logging:
+      <<: *common-logging
 
   tix-api:
     restart: always
@@ -111,6 +125,8 @@ services:
     environment:
       <<: *common-variables
       RECAPTCHA_SECRET_KEY: $RECAPTCHA_SECRET_KEY
+    logging:
+      <<: *common-logging
 
   tix-iptoas:
     image: tixmeasurements/iptoas:latest
@@ -123,6 +139,8 @@ services:
       # store downloaded files in the host machine so they can be manually
       # deleted if desired
       - ./iptoas_downloads:/app/downloads
+    logging:
+      <<: *common-logging
 
   tix-web:
     restart: always
@@ -131,6 +149,8 @@ services:
     #   context: ../tix-web
     ports:
       - "$WEB_PORT:80"
+    logging:
+      <<: *common-logging
   
   rabbitmq:
     restart: always
@@ -139,6 +159,8 @@ services:
       <<: *common-variables
     ports:
       - "15672:15672"
+    logging:
+      <<: *common-logging
 
   mysql:
     restart: always
@@ -149,6 +171,8 @@ services:
       MYSQL_DATABASE: tix
       MYSQL_USER: tix
       MYSQL_PASSWORD: tix
+    logging:
+      <<: *common-logging
     # volumes:
     #   - mysql-datadir:/var/lib/mysql
     #   - sql-dump:/docker-entrypoint-initdb.d
