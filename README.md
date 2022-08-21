@@ -35,7 +35,7 @@ Once the `.env` file is properly set up, just run:
 docker-compose up
 ```
 
-### TP to AS
+### IP to AS
 
 The [service `tix-iptoas`](https://github.com/TiX-measurements/ip_to_as) will initialize the MySQL database with the mappings from the IP prefixes to autonomous system organization names (used for when the application creates reports). This service is manually executed because it takes a while to run. To run it just execute:
 
