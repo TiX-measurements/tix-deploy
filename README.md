@@ -48,3 +48,12 @@ docker compose run --entrypoint 'sh /app/exe.sh' tix-iptoas
 ### Restart deploy
 
 The compose will create some persistent volumes. These volumes are persisted even if you destroy the containers by executing `docker-compose down`. If you want to run the deployment from scratch, you'll have to delete them. You can list the existing volumes by using the `docker volume ls` command and then delete by using `docker volume rm <volume name>`.
+
+## Updating services
+
+These are the steps used to update a service in production without downtime:
+
+ 1. Push the new service image (with tag `latest`) to the Docker's registry (for example `docker push tixmeasurements/tix-api:latest`)
+ 2. Log into the server where `tix-deploy` is cloned
+ 3. Download the new image: `docker compose pull`
+ 4. Restart the updated image: `docker compose up --force-recreate -d tix-api` (or whatever service you want to update)
