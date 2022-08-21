@@ -14,6 +14,9 @@ RABBITMQ_PASSWORD=<pass>
 # API admin user credentials
 TIX_API_ADMIN_USERNAME=<user>
 TIX_API_ADMIN_PASSWORD=<pass>
+
+# this is the secret used by Google's ReCAPTCHA service. If you change this key you'll also
+# have to change the corresponding client key `tix-web` and `tix-app`
 RECAPTCHA_SECRET_KEY=<secret-key>
 
 # port in the host where the frontend is served. For local deployments
