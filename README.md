@@ -12,19 +12,24 @@ RABBITMQ_USERNAME=<name>
 RABBITMQ_PASSWORD=<pass>
 
 # API admin user credentials
+# the tix-api service will create an admin user with these upon startup
+# you can put whatever values you prefer here (although it is recommended
+# to use a large password for production deployments)
 TIX_API_ADMIN_USERNAME=<user>
 TIX_API_ADMIN_PASSWORD=<pass>
 
 # this is the secret used by Google's ReCAPTCHA service. If you change this key you'll also
 # have to change the corresponding client key `tix-web` and `tix-app`
+# the recommendation is to copy the secret key being used in production
 RECAPTCHA_SECRET_KEY=<secret-key>
 
-# port in the host where the frontend is served. For local deployments
+# port (in the host machine) where the frontend is served. For local deployments
 # you can use another port (like 3000)
 WEB_PORT=80
 
 # API location. When deploying with compose there's no need to change them
 # because they are used for communicating services inside Docker's network
+# you probably don't need to update them
 TIX_API_HOST=tix-api
 TIX_API_PORT=3001
 TIX_API_HTTPS=False
