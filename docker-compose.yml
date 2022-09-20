@@ -157,8 +157,8 @@ services:
     image: rabbitmq:3-management
     environment:
       <<: *common-variables
-    ports:
-      - "15672:15672"
+    # ports:
+    #   - "15672:15672"
     logging:
       <<: *common-logging
 
